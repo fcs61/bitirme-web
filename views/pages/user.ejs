@@ -1,0 +1,96 @@
+<%- include('../layouts/header.ejs') %>
+                    <div class="container-fluid">
+                        <h1 class="h3 mb-4 text-gray-800">
+                            <%= userData.name %> <%= userData.surname %> (<%= userData.phone %>)
+                        </h1>
+                        <div class="row">
+                            <div class="col-xl-6 col-lg-7">
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Kişi Listesi</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table">
+                                            <tbody>
+                                                <% if(typeof userList != 'undefined') { %> <% userList.forEach(function(user) { %>
+                                                <tr>
+                                                    <td style="border-bottom: 1px solid #e3e6f0; border-top: unset;">
+                                                        <div>
+                                                            <div>
+                                                                <div>
+                                                                    <h6><span class="text-dark"><%= user.displayName %></span></h6>
+                                                                </div>
+                                                                <div style=" margin-top: 20px; ">
+                                                                    <ul class="list-unstyled">
+                                                                        <li class="text-primary"><i class="fas fa-phone"> </i><%= user.phoneNumber %></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }) %> <% } %>
+                                            </tbody>
+                                        </table>                                        
+                                    </div>
+                                </div>
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Yardım İstekleri</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table">
+                                            <tbody>
+                                                <% if(typeof helpRequests != 'undefined') { %> <% helpRequests.forEach(function(help) { %>
+                                                <tr>
+                                                    <td style="border-bottom: 1px solid #e3e6f0; border-top: unset;">
+                                                        <div>
+                                                            <div>
+                                                                <div>
+                                                                    <h6><span class="text-dark"><%=help.sender%></span></h6>
+                                                                </div>
+                                                                <div style=" margin-top: 20px; ">
+                                                                    <ul class="list-unstyled">
+                                                                        <li class="text-primary">
+                                                                            <i class="fas fa-calendar"></i><%= help.data.date.toDate().toISOString().slice(0, 19).replace('T', ' ') %>
+                                                                            <span style="margin-left:20px">
+                                                                                <i class="fas fa-map-marker-alt"></i><a target="_blank" href="https://maps.google.com/maps?q=<%=help.data.latitude%>,<%=help.data.longitude%>">Konumu Görüntüle</a>
+                                                                            </span>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }) %> <% } %>
+                                            </tbody>
+                                        </table>  
+                                    </div>
+                                </div>
+                            </div> 
+                            <div class="col-xl-6 col-lg-5">
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Son Konumu</h6>
+                                        <div class="dropdown no-arrow">
+                                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                                                <a class="dropdown-item" target="_blank" href="https://maps.google.com/maps?q=<%=userData.lastLocation%>"><i class="fas fa-share"></i> Google Map'te Görüntüle</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mapouter">
+                                            <div class="gmap_canvas">
+                                                <iframe width="100%" height="500" id="gmap_canvas" src="https://maps.google.com/maps?q=<%=userData.lastLocation%>&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+<%- include('../layouts/footer.ejs') %>
