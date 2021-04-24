@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 var ejs = require('ejs');
@@ -10,12 +11,14 @@ const request = require('request');
 const cheerio = require("cheerio");
 var querystring = require('querystring');
 const session = require('express-session');
+const domain = process.env.DOMAIN;
 
 app.use(session({
     secret: 'deprem-acil-yardim',
     resave: false,
     saveUninitialized: true
-  }));
+  })
+);
 
 const admin = require('firebase-admin');
 const serviceAccounts = require('./firebase-config.json');
@@ -43,9 +46,24 @@ app.get("/depremler-afad", function (req, res) {
             body: formData,
             method: "POST",
         },
-        function (error, response, body) {
+        async function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 var myEarthquakes = [];
+                var vEq = await getvirtualEarthquake();
+                if (typeof vEq != 'undefined' && Object.keys(vEq).length !== 0) {
+                    myEarthquakes.push({
+                        buyukluk: vEq.magnitude,
+                        enlem: vEq.latitude,
+                        boylam: vEq.longitude,
+                        tarih: vEq.date,
+                        saat: vEq.time,
+                        zaman: vEq.Datetime,
+                        sehir: vEq.city,
+                        ilce: vEq.district,
+                        yer: vEq.city + " " + vEq.district,
+                        derinlik: vEq.depth,
+                    });            
+                }
                 var earthquakes = JSON.parse(response.body);
                 for (const earthquake of earthquakes) {
                     var city = earthquake.city == "-" ? earthquake.other.replace(/.*\(|\).*/g, "") : earthquake.city;
@@ -81,8 +99,23 @@ app.get("/depremler-afad", function (req, res) {
     );
 });
 
-app.get('/depremler-kandilli', function (req, res) {
+app.get('/depremler-kandilli', async function (req, res) {
     var myEarthquakes = [];
+    var vEq = await getvirtualEarthquake();
+    if (typeof vEq != 'undefined' && Object.keys(vEq).length !== 0) {
+        myEarthquakes.push({
+            buyukluk: vEq.magnitude,
+            enlem: vEq.latitude,
+            boylam: vEq.longitude,
+            tarih: vEq.date,
+            saat: vEq.time,
+            zaman: vEq.Datetime,
+            sehir: vEq.city,
+            ilce: vEq.district,
+            yer: vEq.city + " " + vEq.district,
+            derinlik: vEq.depth,
+        });            
+    }          
     request("http://www.koeri.boun.edu.tr/scripts/lst0.asp", (error, response, html) => {
         if (!error && response.statusCode == 200) {
             const $ = cheerio.load(html);
@@ -217,7 +250,7 @@ app.get('/user/:user_id', async function (req, res) {
 
 app.get('/depremler', function (req, res) {
     if (req.session.login) {
-        var url = req.query.kaynak == 'kandilli' ? "http://35.246.197.191/depremler-kandilli" : "http://35.246.197.191/depremler-afad";
+        var url = req.query.kaynak == 'kandilli' ? ""+domain+"depremler-kandilli" : ""+domain+"depremler-afad";
         var kaynak = req.query.kaynak == 'kandilli' ? 'kandilli' : 'afad';
         var kaynak2 = req.query.kaynak == 'kandilli' ? 'Kandilli' : 'Afad';
         request({url:url}, function(error, response, body) {
@@ -259,6 +292,56 @@ app.get('/depremler', function (req, res) {
     }
 });
 
+app.get('/create-earthquake', async function (req, res) {
+    if (req.session.login) {
+        var virtualEarthquake = await getvirtualEarthquake();
+        res.render('pages/create-earthquake.ejs', {
+            title: "Sanal Deprem Oluştur",
+            vEq : virtualEarthquake
+        });
+    } else {
+        res.redirect("/login");    
+    }
+});
+
+app.post('/create-earthquake', async function (req, res) {
+    var city = req.body["city"];
+    var district = req.body["district"];
+    var date = req.body["date"];
+    var time = req.body["time"];
+    var latitude = req.body["latitude"];
+    var longitude = req.body["longitude"];
+    var magnitude = req.body["magnitude"];
+    const docRef = db.collection("eqControl").doc("virtualEarthquake");
+    docRef.set({
+        latitude: latitude,
+        longitude: longitude,
+        date: date,
+        time: time,
+        dateTime: date + " " + time,
+        city: city,
+        district: district,
+        magnitude: magnitude,
+        depth: '5'
+    });
+    var virtualEarthquake = await getvirtualEarthquake();
+    res.render('pages/create-earthquake.ejs', {
+        title: "Sanal Deprem Oluştur",
+        success: "Deprem başarıyla oluşturuldu.",
+        vEq : virtualEarthquake,
+    });
+});
+
+app.post('/delete-earthquake', async function (req, res) {
+    db.collection("eqControl").doc("virtualEarthquake").delete();
+    var virtualEarthquake = await getvirtualEarthquake();
+    res.render('pages/create-earthquake.ejs', {
+        title: "Sanal Deprem Oluştur",
+        success: "Deprem başarıyla silindi.",
+        vEq : virtualEarthquake,
+    });
+});
+
 async function getUserData(user_id) {
     const snapshot = await db.collection('users').doc(user_id).get();
     return snapshot.data();
@@ -295,6 +378,11 @@ async function isUserExist(user_id) {
     return snapshot.exists;
 }
 
+async function getvirtualEarthquake() {
+    const snapshot = await db.collection('eqControl').doc('virtualEarthquake').get();
+    return snapshot.exists ? snapshot.data() : {};
+}
+
 function reverseDate(date) {
     dateArray = date.split(".");
     dateArray.reverse();
@@ -305,6 +393,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, function () {
   console.log('Sunucu çalışıyor...');
 });
+
+
 
 
 

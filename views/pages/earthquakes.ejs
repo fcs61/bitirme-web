@@ -45,6 +45,7 @@
                                                 <th>Şehir</th>
                                                 <th>İlçe</th>
                                                 <th>Yer</th>
+                                                <th>Konum</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -60,6 +61,14 @@
                                                 <td><%= earthquake.sehir %></td>
                                                 <td><%= earthquake.ilce %></td>
                                                 <td><%= earthquake.yer %></td>
+												<td>
+													<a target="_blank" href="https://maps.google.com/maps?q=<%= earthquake.enlem %>,<%= earthquake.boylam %>" class="btn btn-danger btn-icon-split btn-sm">
+														<span class="icon text-white-50">
+															<i class="fas fa-map-pin"></i>
+														</span>
+														<span class="text">Google Map'te Aç</span>
+													</a>
+												</td>
                                             </tr>
                                             <% }) %> <% } %>
                                         </tbody>

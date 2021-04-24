@@ -1,0 +1,101 @@
+<%- include('../layouts/header.ejs') %>
+                    <div class="container-fluid">
+                        <h1 class="h3 mb-4 text-gray-800">
+                            Sanal Deprem Oluştur
+                        </h1>
+                        <form method="POST" action="/create-earthquake">
+                            <% if(typeof success != 'undefined') { %>
+                            <div class="customer-form-success alert alert-success" role="alert" style="font-size: 16px;">
+                                <%= success %>
+                            </div>
+                            <% } %>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Şehir</label>
+                                    <input type="text" name="city" class="form-control" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>İlçe</label>
+                                    <input type="text" name="district" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Tarih</label>
+                                    <input type="text" name="date" class="form-control datepicker" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Saat</label>
+                                    <input type="text" name="time" value="00:00:00" class="form-control datepicker" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Enlem</label>
+                                    <input type="text" id="latitude" name="latitude" class="form-control" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Boylam</label>
+                                    <input type="text" id="longitude" name="longitude" class="form-control" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Büyüklük</label>
+                                    <input type="text" name="magnitude" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-success create-project">Oluştur</button>
+                            </div>
+                        </form>
+                        <% if(typeof vEq != 'undefined' && Object.keys(vEq).length !== 0) { %>
+                        <h4 style="margin-top: 30px;">Son Oluşturulan Sanal Deprem</h4>
+                        <div style="margin-top: 15px;">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <th>Saat</th>
+                                            <th>Enlem</th>
+                                            <th>Boylam</th>
+                                            <th>Büyüklük</th>
+                                            <th>Şehir</th>
+                                            <th>İlçe</th>
+                                            <th>Sil</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><%= vEq.date %></td>
+                                            <td><%= vEq.time %></td>
+                                            <td><%= vEq.latitude %></td>
+                                            <td><%= vEq.longitude %></td>
+                                            <td><%= vEq.magnitude %></td>
+                                            <td><%= vEq.city %></td>
+                                            <td><%= vEq.district %></td>
+                                            <td>
+                                                <form onSubmit="if(!confirm('Emin misiniz?')){return false;}" method="POST" action="/delete-earthquake">
+                                                    <button class="delete btn btn-danger btn-icon-split btn-sm">
+                                                        <span class="text">Sil</span>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                    <script>
+                        var latitude = document.getElementById("latitude");
+                        var longitude = document.getElementById("longitude");
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(showPosition);
+                        }
+                        function showPosition(position) {
+                            latitude.value = position.coords.latitude.toFixed(4);
+                            longitude.value = position.coords.longitude.toFixed(4);
+                        }
+                    </script>
+<%- include('../layouts/footer.ejs') %>
