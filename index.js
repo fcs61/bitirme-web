@@ -165,7 +165,7 @@ app.get('/logout', function (req, res) {
 app.post('/login', function (req, res) {
     var username = req.body["username"];
     var password = req.body["password"];
-    if (username == 'admin' && password == '12345') {
+    if (username == 'admin' && password == 'bitirme') {
         req.session.login = 'true';
         res.redirect("/");
     } else {
@@ -265,12 +265,18 @@ async function getUserData(user_id) {
 }
 
 async function getUserList(user_id) {
-    var userList = [];
-    const snapshot = await db.collection('usersList').where('uid', '==', user_id).get();
-    snapshot.forEach((doc) => {
-        userList.push(doc.data());
-    });
-    return userList;
+    var list = [];
+    const snapshot = await db.collection("users").doc(user_id).get();
+    var users = snapshot.data().userList;
+    if (users !== undefined) {
+        for (const user of users) {
+            list.push({
+                displayName : user.displayName,
+                phoneNumber : user.phoneNumber
+            })
+        }
+    }
+    return list;
 }
 
 async function getUserHelpRequest(user_id) {
