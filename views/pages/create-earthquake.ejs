@@ -2,6 +2,11 @@
                     <div class="container-fluid">
                         <h1 class="h3 mb-4 text-gray-800">
                             Sanal Deprem Oluştur
+                            <form style="float:right" onSubmit="if(!confirm('Emin misiniz?')){return false;}" method="POST" action="/trigger">
+                                <button class="delete btn btn-danger btn-icon-split btn-sm">
+                                    <span class="text">Tetikle</span>
+                                </button>
+                            </form>
                         </h1>
                         <form method="POST" action="/create-earthquake">
                             <% if(typeof success != 'undefined') { %>

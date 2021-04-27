@@ -57,7 +57,7 @@ app.get("/depremler-afad", function (req, res) {
                         boylam: vEq.longitude,
                         tarih: vEq.date,
                         saat: vEq.time,
-                        zaman: vEq.Datetime,
+                        zaman: vEq.dateTime,
                         sehir: vEq.city,
                         ilce: vEq.district,
                         yer: vEq.city + " " + vEq.district,
@@ -109,7 +109,7 @@ app.get('/depremler-kandilli', async function (req, res) {
             boylam: vEq.longitude,
             tarih: vEq.date,
             saat: vEq.time,
-            zaman: vEq.Datetime,
+            zaman: vEq.dateTime,
             sehir: vEq.city,
             ilce: vEq.district,
             yer: vEq.city + " " + vEq.district,
@@ -342,6 +342,194 @@ app.post('/delete-earthquake', async function (req, res) {
     });
 });
 
+app.post('/trigger', async function (req, res) {
+	var url = ""+domain+"depremler-afad?min=4";
+	request({url: url, json: true }, function (error, response, deprem) {
+		if (!error && response.statusCode === 200) {
+			var tarih = deprem[0].tarih;
+			var saat = deprem[0].saat;
+            var zaman = deprem[0].zaman;
+			var enlem = deprem[0].enlem;
+			var boylam = deprem[0].boylam;
+			var derinlik = deprem[0].derinlik;
+			var buyukluk = deprem[0].buyukluk;
+			var sehir = deprem[0].sehir;
+			var ilce = deprem[0].ilce;
+			var yer = deprem[0].yer;
+			console.log(url);
+			if (buyukluk >= 4.5 && buyukluk < 5.5) {
+				db.collection("eqControl")
+					.doc("lastEarthquake")
+					.get()
+					.then(function (doc) {
+						console.log(doc.data());
+                        var dateTime = doc.data().dateTime;
+						if (dateTime != zaman) {
+							db.collection("earthquakes").add({
+								latitude: enlem,
+								longitude: boylam,
+								date: tarih,
+								time: saat,
+                                dateTime: zaman,
+								city: sehir,
+								district: ilce,
+								magnitude: buyukluk,
+                                depth: derinlik
+							})
+							.then(function(docRef) {
+								var eqId = docRef.id;
+								db.collection("users")
+									.get()
+									.then((querySnapshot) => {
+										querySnapshot.forEach((doc) => {
+											var firstLocation = doc.data().firstLocation;
+											var lastLocation = doc.data().lastLocation;
+											var distance1 = 200;
+											var distance2 = 200;
+											if (typeof firstLocation !== "undefined") {
+												firstLocation = firstLocation.replace(/\s/g, "");
+												var res1 = firstLocation.split(",");
+												var lat1 = res1[0];
+												var lon1 = res1[1];
+												var distance1 = calcCrow(lat1, lon1, enlem, boylam);
+											}
+											if (typeof lastLocation !== "undefined") {
+												lastLocation = lastLocation.replace(/\s/g, "");
+												var res2 = lastLocation.split(",");
+												var lat2 = res2[0];
+												var lon2 = res2[1];
+												var distance2 = calcCrow(lat2, lon2, enlem, boylam);
+											}
+											if (distance1 < 101 || distance2 < 101) {
+												var notifyToken = doc.data().notifyToken;
+												var title = "Depremi hissettiniz mi?";
+												var body = yer + " bölgesindeki depremi hissettiniz mi? Hemen durumunu bildir.";
+												var message = {
+												  data: {
+													notification_id: '2',
+													earthquake_id: eqId,
+													magnitude: buyukluk
+												  },
+												  token: notifyToken,
+												  notification: {title: title, body: body},
+												};
+												admin.messaging().send(message)
+												  .then((response) => {
+													console.log('Bildirim gönderildi:', response);
+												  })
+												  .catch((error) => {
+													console.log('Hata:', error);
+												  });
+											}
+										});
+									});
+							});
+							const docRef = db.collection("eqControl").doc("lastEarthquake");
+							docRef.set({
+								latitude: enlem,
+								longitude: boylam,
+								date: tarih,
+								time: saat,
+                                dateTime: zaman,
+								city: sehir,
+								district: ilce,
+								magnitude: buyukluk,
+                                depth: derinlik
+							});
+						}
+					});
+			}
+			else if (buyukluk >= 5.5) {
+				db.collection("eqControl")
+					.doc("lastEarthquake")
+					.get()
+					.then(function (doc) {
+						var dateTime = doc.data().dateTime;
+						if (dateTime != zaman) {
+							db.collection("earthquakes").add({
+								latitude: enlem,
+								longitude: boylam,
+								date: tarih,
+								time: saat,
+                                dateTime: zaman,
+								city: sehir,
+								district: ilce,
+								magnitude: buyukluk,
+                                depth: derinlik
+							})
+							.then(function(docRef) {
+								var eqId = docRef.id;
+								db.collection("users")
+									.get()
+									.then((querySnapshot) => {
+										querySnapshot.forEach((doc) => {
+											var firstLocation = doc.data().firstLocation;
+											var lastLocation = doc.data().lastLocation;
+											var distance1 = 200;
+											var distance2 = 200;
+											if (typeof firstLocation !== "undefined") {
+												firstLocation = firstLocation.replace(/\s/g, "");
+												var res1 = firstLocation.split(",");
+												var lat1 = res1[0];
+												var lon1 = res1[1];
+												var distance1 = calcCrow(lat1, lon1, enlem, boylam);
+											}
+											if (typeof lastLocation !== "undefined") {
+												lastLocation = lastLocation.replace(/\s/g, "");
+												var res2 = lastLocation.split(",");
+												var lat2 = res2[0];
+												var lon2 = res2[1];
+												var distance2 = calcCrow(lat2, lon2, enlem, boylam);
+											}
+											if (distance1 < 101 || distance2 < 101) {
+												var notifyToken = doc.data().notifyToken;
+												var title = "Güvende misiniz?";
+												var body = yer + " bölgesindeki depremde güvende misiniz? Hemen durumunu bildir.";
+												var message = {
+												  data: {
+													notification_id: '2',
+													earthquake_id: eqId,
+													magnitude: buyukluk
+												  },
+												  token: notifyToken,
+												  notification: {title: title, body: body},
+												};
+												admin.messaging().send(message)
+												  .then((response) => {
+													console.log('Bildirim gönderildi:', response);
+												  })
+												  .catch((error) => {
+													console.log('Hata:', error);
+												  });
+											}
+										});
+									});
+							});
+							const docRef = db.collection("eqControl").doc("lastEarthquake");
+							docRef.set({
+								latitude: enlem,
+								longitude: boylam,
+								date: tarih,
+								time: saat,
+                                dateTime: zaman,
+								city: sehir,
+								district: ilce,
+								magnitude: buyukluk,
+                                depth: derinlik
+							});
+						}
+					});
+			}
+		}
+	});
+    var virtualEarthquake = await getvirtualEarthquake();
+    res.render('pages/create-earthquake.ejs', {
+        title: "Sanal Deprem Oluştur",
+        success: "Tetikleme başarılı.",
+        vEq : virtualEarthquake,
+    });
+});
+
 async function getUserData(user_id) {
     const snapshot = await db.collection('users').doc(user_id).get();
     return snapshot.data();
@@ -387,6 +575,21 @@ function reverseDate(date) {
     dateArray = date.split(".");
     dateArray.reverse();
     return dateArray.join(".");
+}
+
+function calcCrow(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var lat1 = toRad(lat1);
+    var lat2 = toRad(lat2);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+}
+function toRad(Value) {
+    return (Value * Math.PI) / 180;
 }
 
 const PORT = process.env.PORT || 3000;
