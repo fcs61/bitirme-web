@@ -246,14 +246,14 @@ app.get('/earthquakes', function (req, res) {
 app.get('/user/:user_id', async function (req, res) {
 	if (req.session.login) {
 		var user_id = req.params.user_id;
-        var userData = await getUserData(user_id);
-        var userList = await getUserList(user_id);
-        var helpRequests = await getUserHelpRequest(user_id);
-        var affectedEarthquakes = await getUserAffectedEarthquakes(user_id);
-        var safeEarthquakes = await getUserSafeEarthquakes(user_id);
-        var notSafeEarthquakes = await getUserNotSafeEarthquakes(user_id);
         var userExist = await isUserExist(user_id);
         if (userExist) {
+			var userData = await getUserData(user_id);
+			var userList = await getUserList(user_id);
+			var helpRequests = await getUserHelpRequest(user_id);
+			var affectedEarthquakes = await getUserAffectedEarthquakes(user_id);
+			var safeEarthquakes = await getUserSafeEarthquakes(user_id);
+			var notSafeEarthquakes = await getUserNotSafeEarthquakes(user_id);
             res.render('pages/user.ejs', {
                 title: userData.name + " " + userData.surname,
                 userData: userData,
