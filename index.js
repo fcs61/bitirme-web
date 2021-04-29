@@ -226,12 +226,32 @@ app.get('/users', function (req, res) {
     }
 });
 
+app.get('/earthquakes', function (req, res) {
+    if (req.session.login) {
+        db.collection("earthquakes").get().then((querySnapshot) => {
+            var earthquakes = [];
+            querySnapshot.forEach((doc) => {
+                earthquakes.push({id : doc.id, data : doc.data()});
+            });
+            res.render('pages/earthquakes.ejs', {
+                title: "Kayıtlı Depremler",
+                earthquakes: earthquakes,
+            });
+        });
+    } else {
+        res.redirect("/login");
+    }
+});
+
 app.get('/user/:user_id', async function (req, res) {
 	if (req.session.login) {
 		var user_id = req.params.user_id;
         var userData = await getUserData(user_id);
         var userList = await getUserList(user_id);
         var helpRequests = await getUserHelpRequest(user_id);
+        var affectedEarthquakes = await getUserAffectedEarthquakes(user_id);
+        var safeEarthquakes = await getUserSafeEarthquakes(user_id);
+        var notSafeEarthquakes = await getUserNotSafeEarthquakes(user_id);
         var userExist = await isUserExist(user_id);
         if (userExist) {
             res.render('pages/user.ejs', {
@@ -239,6 +259,33 @@ app.get('/user/:user_id', async function (req, res) {
                 userData: userData,
                 userList: userList,
                 helpRequests: helpRequests,
+                affectedEarthquakes: affectedEarthquakes,
+                safeEarthquakes: safeEarthquakes,
+                notSafeEarthquakes: notSafeEarthquakes
+            });
+        } else {
+            res.redirect("/");
+        }
+	} else {
+		res.redirect("/login");
+	}
+});
+
+app.get('/earthquake/:eq_id', async function (req, res) {
+	if (req.session.login) {
+		var eq_id = req.params.eq_id;
+        var earthquakeExist = await isEarthquakeExist(eq_id);
+        if (earthquakeExist) {
+            var eqData = await getEqData(eq_id);
+            var affectedUsers = await getAffectedUsers(eq_id);
+            var safeUsers = await getSafeUsers(eq_id);
+            var notSafeUsers = await getNotSafeUsers(eq_id);
+            res.render('pages/earthquake.ejs', {
+                title: eqData.city + " " + eqData.district + " " + eqData.magnitude,
+                eqData: eqData,
+                affectedUsers: affectedUsers,
+                safeUsers: safeUsers,
+                notSafeUsers: notSafeUsers
             });
         } else {
             res.redirect("/");
@@ -274,7 +321,7 @@ app.get('/depremler', function (req, res) {
                 } else {
                     var max = '';
                 }
-                res.render('pages/earthquakes.ejs', {
+                res.render('pages/depremler.ejs', {
                     title: "Depremler",
                     earthquakes: earthquakes,
                     kaynak: kaynak,
@@ -535,6 +582,11 @@ async function getUserData(user_id) {
     return snapshot.data();
 }
 
+async function getEqData(eq_id) {
+    const snapshot = await db.collection('earthquakes').doc(eq_id).get();
+    return snapshot.exists ? snapshot.data() : false;
+}
+
 async function getUserList(user_id) {
     var list = [];
     const snapshot = await db.collection("users").doc(user_id).get();
@@ -550,15 +602,68 @@ async function getUserList(user_id) {
     return list;
 }
 
+async function getUserAffectedEarthquakes(user_id) {
+    var earthquakes = [];
+    const snapshot = await db.collection("users").doc(user_id).get();
+	if (snapshot.exists) {
+		var AffectedFrom = snapshot.data().AffectedFrom;
+        if (AffectedFrom !== undefined) {
+            for (const eqId of AffectedFrom) {
+                var eqData = await getEqData(eqId);
+                if (eqData) {
+                    earthquakes.push({eqId: eqId, eqData: eqData});
+                }
+            }
+        }
+	}
+    return earthquakes; 
+}
+
+async function getUserSafeEarthquakes(user_id) {
+    var earthquakes = [];
+    const snapshot = await db.collection("users").doc(user_id).get();
+	if (snapshot.exists) {
+		var ImSafe = snapshot.data().ImSafe;
+        if (ImSafe !== undefined) {
+            for (const eqId of ImSafe) {
+                var eqData = await getEqData(eqId);
+                if (eqData) {
+                    earthquakes.push({eqId: eqId, eqData: eqData});
+                }
+            }
+        }
+	}
+    return earthquakes; 
+}
+
+async function getUserNotSafeEarthquakes(user_id) {
+    var earthquakes = [];
+    const snapshot = await db.collection("users").doc(user_id).get();
+	if (snapshot.exists) {
+		var EqHelpRequests = snapshot.data().EqHelpRequests;
+        if (EqHelpRequests !== undefined) {
+            for (const eqId of EqHelpRequests) {
+                var eqData = await getEqData(eqId);
+                if (eqData) {
+                    earthquakes.push({eqId: eqId, eqData: eqData});
+                }
+            }
+        }
+	}
+    return earthquakes; 
+}
+
 async function getUserHelpRequest(user_id) {
     var helpRequests = [];
     const snapshot = await db.collection("allNotifications").doc(user_id).get();
-    var notifications = snapshot.data().notify;
-    for (const notification of notifications) {
-        var userData = await getUserData(notification.senderId);
-        helpRequests.push({data: notification, sender: userData.name + " " + userData.surname})
-    }
-    return snapshot.exists ? helpRequests : []; 
+	if (snapshot.exists) {
+		var notifications = snapshot.data().notify;
+		for (const notification of notifications) {
+			var userData = await getUserData(notification.senderId);
+			helpRequests.push({data: notification, sender: userData.name + " " + userData.surname})
+		}
+	}
+    return helpRequests; 
 }
 
 async function isUserExist(user_id) {
@@ -566,9 +671,80 @@ async function isUserExist(user_id) {
     return snapshot.exists;
 }
 
+async function isEarthquakeExist(eq_id) {
+    const snapshot = await db.collection('earthquakes').doc(eq_id).get();
+    return snapshot.exists;
+}
+
 async function getvirtualEarthquake() {
     const snapshot = await db.collection('eqControl').doc('virtualEarthquake').get();
     return snapshot.exists ? snapshot.data() : {};
+}
+
+async function getAffectedUsers(eq_id) {
+    var users = [];
+    const snapshot = await db.collection('users').get();
+    snapshot.forEach(doc => {
+        var AffectedFrom = doc.data().AffectedFrom;
+        if (AffectedFrom !== undefined) {
+            for (const eqId of AffectedFrom) {
+                if (eqId == eq_id) {
+                    users.push({
+                        name : doc.data().name,
+                        surname : doc.data().surname,
+                        phone : doc.data().phone,
+                        user_id : doc.id,
+                    })
+                }
+                break;
+            }
+        }
+    });
+    return users;
+}
+
+async function getSafeUsers(eq_id) {
+    var users = [];
+    const snapshot = await db.collection('users').get();
+    snapshot.forEach(doc => {
+        var ImSafe = doc.data().ImSafe;
+        if (ImSafe !== undefined) {
+            for (const eqId of ImSafe) {
+                if (eqId == eq_id) {
+                    users.push({
+                        name : doc.data().name,
+                        surname : doc.data().surname,
+                        phone : doc.data().phone,
+                        user_id : doc.id,
+                    })
+                }
+                break;
+            }
+        }
+    });
+    return users;
+}
+
+async function getNotSafeUsers(eq_id) {
+    var users = [];
+    const snapshot = await db.collection('users').get();
+    snapshot.forEach(doc => {
+        var EqHelpRequests = doc.data().EqHelpRequests;
+        if (EqHelpRequests !== undefined) {
+            for (const eqId of EqHelpRequests) {
+                if (eqId == eq_id) {
+                    users.push({
+                        name : doc.data().name,
+                        surname : doc.data().surname,
+                        phone : doc.data().phone,
+                        user_id : doc.id,
+                    })
+                }
+                break;
+            }
+        }
+    });
+    return users;
 }
 
 function reverseDate(date) {
@@ -588,6 +764,7 @@ function calcCrow(lat1, lon1, lat2, lon2) {
     var d = R * c;
     return d;
 }
+
 function toRad(Value) {
     return (Value * Math.PI) / 180;
 }
@@ -596,21 +773,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, function () {
   console.log('Sunucu çalışıyor...');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-

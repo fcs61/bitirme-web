@@ -1,41 +1,19 @@
 <%- include('../layouts/header.ejs') %>
                     <div class="container-fluid">
                         <h1 class="h3 mb-4 text-gray-800">
-                            Depremler
+                            Kayıtlı Depremler
                         </h1>
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
                                 <h6 style="line-height: 30px;" class="m-0 font-weight-bold text-primary">
                                     Deprem Listesi
-                                    <form method="get" class="float-right">
-                                        <div style="margin-right: 10px; width: 126px; float: left; margin-top: 1px;" class="input-group">
-                                            <input type="text" name="tarih" value="<%=tarih%>" placeholder="Tarih" class="datepicker custom-select custom-select-sm form-control form-control-sm" />
-                                        </div>
-                                        <div style="margin-right: 10px; width: 126px; float: left; margin-top: 1px;" class="input-group">
-                                            <input type="text" name="min" value="<%=min%>" placeholder="Min Büyüklük" class="custom-select custom-select-sm form-control form-control-sm" />
-                                        </div>
-                                        <div style="margin-right: 10px; width: 129px; float: left; margin-top: 1px;" class="input-group">
-                                            <input type="text" name="max" value="<%=max%>" placeholder="Max Büyüklük" value="" class="custom-select custom-select-sm form-control form-control-sm" />
-                                        </div>
-                                        <select style="width: auto; margin-right: 7px;" id="kaynak" name="kaynak" class="custom-select custom-select-sm form-control form-control-sm">
-                                            <option value="afad">Kaynak: Afad</option>
-                                            <option value="kandilli">Kaynak: Kandilli</option>
-                                        </select>
-                                        <script>
-                                            document.getElementById('kaynak').value = "<%=kaynak%>";
-                                        </script>
-                                        <button type="submit" class="btn btn-primary btn-icon-split btn-sm">
-                                            <span class="icon text-white-50"><i class="fas fa-filter"></i></span><span class="text">Filtrele</span>
-                                        </button>
-                                    </form>                                    
                                 </h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" id="earthquakesTable" width="100%" cellspacing="0">
+                                    <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th>Kaynak</th>
                                                 <th>Tarih</th>
                                                 <th>Saat</th>
                                                 <th>Enlem</th>
@@ -44,31 +22,30 @@
                                                 <th>Büyüklük</th>
                                                 <th>Şehir</th>
                                                 <th>İlçe</th>
-                                                <th>Yer</th>
                                                 <th>Konum</th>
+                                                <th>Deprem Sayfası</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <% if(typeof earthquakes != 'undefined') { %> <% earthquakes.forEach(function(earthquake) { %>
                                             <tr>
-                                                <td><%= kaynak2 %></td>
-                                                <td><%= earthquake.tarih %></td>
-                                                <td><%= earthquake.saat %></td>
-                                                <td><%= earthquake.enlem %></td>
-                                                <td><%= earthquake.boylam %></td>
-                                                <td><%= earthquake.derinlik %></td>
-                                                <td><%= earthquake.buyukluk %></td>
-                                                <td><%= earthquake.sehir %></td>
-                                                <td><%= earthquake.ilce %></td>
-                                                <td><%= earthquake.yer %></td>
-												<td>
-													<a target="_blank" href="https://maps.google.com/maps?q=<%= earthquake.enlem %>,<%= earthquake.boylam %>" class="btn btn-danger btn-icon-split btn-sm">
+                                                <td><%= earthquake.data.date %></td>
+                                                <td><%= earthquake.data.time %></td>
+                                                <td><%= earthquake.data.latitude %></td>
+                                                <td><%= earthquake.data.longitude %></td>
+                                                <td><%= earthquake.data.depth %></td>
+                                                <td><%= earthquake.data.magnitude %></td>
+                                                <td><%= earthquake.data.city %></td>
+                                                <td><%= earthquake.data.district %></td>
+                                                <td>
+													<a target="_blank" href="https://maps.google.com/maps?q=<%= earthquake.data.latitude %>,<%= earthquake.data.longitude %>" class="btn btn-danger btn-icon-split btn-sm">
 														<span class="icon text-white-50">
 															<i class="fas fa-map-pin"></i>
 														</span>
 														<span class="text">Google Map'te Aç</span>
 													</a>
 												</td>
+                                                <td><a target="_blank" href="/earthquake/<%= earthquake.id %>" class="btn btn-success btn-icon-split btn-sm"><span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span></a></td>
                                             </tr>
                                             <% }) %> <% } %>
                                         </tbody>

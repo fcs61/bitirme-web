@@ -4,7 +4,7 @@
                             <%= userData.name %> <%= userData.surname %> (<%= userData.phone %>)
                         </h1>
                         <div class="row">
-                            <div class="col-xl-6 col-lg-7">
+                            <div class="col-xl-7 col-lg-7">
                                 <div class="card shadow mb-4">
                                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                         <h6 class="m-0 font-weight-bold text-primary">Kişi Listesi</h6>
@@ -12,7 +12,9 @@
                                     <div class="card-body">
                                         <table class="table">
                                             <tbody>
-                                                <% if(typeof userList != 'undefined') { %> <% userList.forEach(function(user) { %>
+                                                <% if(typeof userList != 'undefined') { %>
+												<%if(userList.length == 0) {%> Kişi listesi boş. <% } %>	
+												<% userList.forEach(function(user) { %>
                                                 <tr>
                                                     <td style="border-bottom: 1px solid #e3e6f0; border-top: unset;">
                                                         <div>
@@ -41,7 +43,9 @@
                                     <div class="card-body">
                                         <table class="table">
                                             <tbody>
-                                                <% if(typeof helpRequests != 'undefined') { %> <% helpRequests.forEach(function(help) { %>
+                                                <% if(typeof helpRequests != 'undefined') { %>
+												<%if(helpRequests.length == 0) {%> Henüz yardım isteği yok. <% } %>												
+												<% helpRequests.forEach(function(help) { %>
                                                 <tr>
                                                     <td style="border-bottom: 1px solid #e3e6f0; border-top: unset;">
                                                         <div>
@@ -68,8 +72,120 @@
                                         </table>  
                                     </div>
                                 </div>
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Deprem Geri Bildirimleri</h6>
+                                    </div>
+                                    <section id="tabs" class="project-tab" style="margin-top:20px">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <nav>
+                                                        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                                            <a class="nav-item nav-link active" id="eq1-tab" data-toggle="tab" href="#eq1" role="tab" aria-controls="eq1" aria-selected="true">Güvende Olmadığı</a>
+                                                            <a class="nav-item nav-link" id="eq2-tab" data-toggle="tab" href="#eq2" role="tab" aria-controls="eq2" aria-selected="false">Güvende Olduğu</a>
+                                                            <a class="nav-item nav-link" id="eq3-tab" data-toggle="tab" href="#eq3" role="tab" aria-controls="eq3" aria-selected="false">Hissettiği</a>
+                                                        </div>
+                                                    </nav>
+                                                    <div class="tab-content" id="nav-tabContent">
+                                                        <div class="tab-pane fade show active" id="eq1" role="tabpanel" aria-labelledby="eq1-tab">
+                                                            <% if(typeof notSafeEarthquakes != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="earthquakesTable1" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Zaman</th>
+                                                                                <th>Büyüklük</th>
+                                                                                <th>Yer</th>
+                                                                                <th>Deprem Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% notSafeEarthquakes.forEach(function(earthquake) { %>
+                                                                            <tr>
+                                                                                <td><%= earthquake.eqData.dateTime %></td>
+                                                                                <td><%= earthquake.eqData.magnitude %></td>
+                                                                                <td><%= earthquake.eqData.city %> <%= earthquake.eqData.district %></td>
+                                                                                <td>
+                                                                                    <a href="/earthquake/<%= earthquake.eqId %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="eq2" role="tabpanel" aria-labelledby="eq2-tab">
+                                                            <% if(typeof safeEarthquakes != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="earthquakesTable2" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Zaman</th>
+                                                                                <th>Büyüklük</th>
+                                                                                <th>Yer</th>
+                                                                                <th>Deprem Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% safeEarthquakes.forEach(function(earthquake) { %>
+                                                                            <tr>
+                                                                                <td><%= earthquake.eqData.dateTime %></td>
+                                                                                <td><%= earthquake.eqData.magnitude %></td>
+                                                                                <td><%= earthquake.eqData.city %> <%= earthquake.eqData.district %></td>
+                                                                                <td>
+                                                                                    <a href="/earthquake/<%= earthquake.eqId %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="eq3" role="tabpanel" aria-labelledby="eq3-tab">
+                                                            <% if(typeof affectedEarthquakes != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="earthquakesTable3" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Zaman</th>
+                                                                                <th>Büyüklük</th>
+                                                                                <th>Yer</th>
+                                                                                <th>Deprem Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% affectedEarthquakes.forEach(function(earthquake) { %>
+                                                                            <tr>
+                                                                                <td><%= earthquake.eqData.dateTime %></td>
+                                                                                <td><%= earthquake.eqData.magnitude %></td>
+                                                                                <td><%= earthquake.eqData.city %> <%= earthquake.eqData.district %></td>
+                                                                                <td>
+                                                                                    <a href="/earthquake/<%= earthquake.eqId %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>    
+                                </div>
                             </div> 
-                            <div class="col-xl-6 col-lg-5">
+                            <div class="col-xl-5 col-lg-5">
                                 <div class="card shadow mb-4">
                                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                         <h6 class="m-0 font-weight-bold text-primary">Son Konumu</h6>

@@ -1,0 +1,180 @@
+<%- include('../layouts/header.ejs') %>
+                    <div class="container-fluid">
+                        <h1 class="h3 mb-4 text-gray-800">
+                            Deprem Sayfası
+                        </h1>
+                        <div class="row">
+                            <div class="col-xl-7 col-lg-7">
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Deprem Bilgileri</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <% if(typeof eqData != 'undefined') { %>
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tarih</th>
+                                                            <th>Saat</th>
+                                                            <th>Büyüklük</th>
+                                                            <th>Derinlik</th>
+                                                            <th>Şehir</th>
+                                                            <th>İlçe</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><%= eqData.date %></td>
+                                                            <td><%= eqData.time %></td>
+                                                            <td><%= eqData.magnitude %></td>
+                                                            <td><%= eqData.depth %></td>
+                                                            <td><%= eqData.city %></td>
+                                                            <td><%= eqData.district %></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        <% } %>                                      
+                                    </div>
+                                </div>
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Kullanıcı Geri Bildirimleri</h6>
+                                    </div>
+                                    <section id="tabs" class="project-tab" style="margin-top:20px">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <nav>
+                                                        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                                            <a class="nav-item nav-link active" id="eq1-tab" data-toggle="tab" href="#eq1" role="tab" aria-controls="eq1" aria-selected="true">Güvende Olmayan</a>
+                                                            <a class="nav-item nav-link" id="eq2-tab" data-toggle="tab" href="#eq2" role="tab" aria-controls="eq2" aria-selected="false">Güvende Olan</a>
+                                                            <a class="nav-item nav-link" id="eq3-tab" data-toggle="tab" href="#eq3" role="tab" aria-controls="eq3" aria-selected="false">Hisseden</a>
+                                                        </div>
+                                                    </nav>
+                                                    <div class="tab-content" id="nav-tabContent">
+                                                        <div class="tab-pane fade show active" id="eq1" role="tabpanel" aria-labelledby="eq1-tab">
+                                                            <% if(typeof notSafeUsers != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="usersTable1" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Ad</th>
+                                                                                <th>Soyad</th>
+                                                                                <th>Telefon</th>
+                                                                                <th>Profil Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% notSafeUsers.forEach(function(user) { %>
+                                                                            <tr>
+                                                                                <td><%= user.name %></td>
+                                                                                <td><%= user.surname %></td>
+                                                                                <td><%= user.phone %></td>
+                                                                                <td>
+                                                                                    <a href="/user/<%= user.user_id %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="eq2" role="tabpanel" aria-labelledby="eq2-tab">
+                                                            <% if(typeof safeUsers != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="usersTable2" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Ad</th>
+                                                                                <th>Soyad</th>
+                                                                                <th>Telefon</th>
+                                                                                <th>Profil Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% safeUsers.forEach(function(user) { %>
+                                                                            <tr>
+                                                                                <td><%= user.name %></td>
+                                                                                <td><%= user.surname %></td>
+                                                                                <td><%= user.phone %></td>
+                                                                                <td>
+                                                                                    <a href="/user/<%= user.user_id %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="eq3" role="tabpanel" aria-labelledby="eq3-tab">
+                                                            <% if(typeof affectedUsers != 'undefined') { %>
+                                                                <div style="margin:20px 0" class="table-responsive">
+                                                                    <table class="table table-bordered" id="usersTable3" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Ad</th>
+                                                                                <th>Soyad</th>
+                                                                                <th>Telefon</th>
+                                                                                <th>Profil Sayfası</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <% affectedUsers.forEach(function(user) { %>
+                                                                            <tr>
+                                                                                <td><%= user.name %></td>
+                                                                                <td><%= user.surname %></td>
+                                                                                <td><%= user.phone %></td>
+                                                                                <td>
+                                                                                    <a href="/user/<%= user.user_id %>" target="_blank" class="btn btn-success btn-icon-split btn-sm">
+                                                                                        <span class="icon text-white-50"><i class="fas fa-eye"></i> </span> <span class="text">Görüntüle</span>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% }) %>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>    
+                                </div>
+                            </div> 
+                            <div class="col-xl-5 col-lg-5">
+                                <div class="card shadow mb-4">
+                                    <% if(typeof eqData != 'undefined') { %>
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Deprem Konumu</h6>
+                                        <div class="dropdown no-arrow">
+                                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                                                <a class="dropdown-item" target="_blank" href="https://maps.google.com/maps?q=<%=eqData.latitude%>,<%=eqData.longitude%>"><i class="fas fa-share"></i> Google Map'te Görüntüle</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mapouter">
+                                            <div class="gmap_canvas">
+                                                <iframe width="100%" height="500" id="gmap_canvas" src="https://maps.google.com/maps?q=<%=eqData.latitude%>,<%=eqData.longitude%>&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+<%- include('../layouts/footer.ejs') %>
