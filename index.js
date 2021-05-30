@@ -12,6 +12,7 @@ const cheerio = require("cheerio");
 var querystring = require('querystring');
 const session = require('express-session');
 const domain = process.env.DOMAIN;
+const domain2 = "http://localhost:3000/";
 
 app.use(session({
     secret: 'deprem-acil-yardim',
@@ -297,7 +298,7 @@ app.get('/earthquake/:eq_id', async function (req, res) {
 
 app.get('/depremler', function (req, res) {
     if (req.session.login) {
-        var url = req.query.kaynak == 'kandilli' ? ""+domain+"depremler-kandilli" : ""+domain+"depremler-afad";
+        var url = req.query.kaynak == 'kandilli' ? ""+domain2+"depremler-kandilli" : ""+domain2+"depremler-afad";
         var kaynak = req.query.kaynak == 'kandilli' ? 'kandilli' : 'afad';
         var kaynak2 = req.query.kaynak == 'kandilli' ? 'Kandilli' : 'Afad';
         request({url:url}, function(error, response, body) {
@@ -390,7 +391,7 @@ app.post('/delete-earthquake', async function (req, res) {
 });
 
 app.post('/trigger', async function (req, res) {
-	var url = ""+domain+"depremler-afad?min=4";
+	var url = ""+domain2+"depremler-afad?min=4";
 	request({url: url, json: true }, function (error, response, deprem) {
 		if (!error && response.statusCode === 200) {
 			var tarih = deprem[0].tarih;
@@ -429,13 +430,13 @@ app.post('/trigger', async function (req, res) {
 									.get()
 									.then((querySnapshot) => {
 										querySnapshot.forEach((doc) => {
-											var firstLocation = doc.data().firstLocation;
+											var homeLocation = doc.data().homeLocation;
 											var lastLocation = doc.data().lastLocation;
 											var distance1 = 200;
 											var distance2 = 200;
-											if (typeof firstLocation !== "undefined") {
-												firstLocation = firstLocation.replace(/\s/g, "");
-												var res1 = firstLocation.split(",");
+											if (typeof homeLocation !== "undefined") {
+												homeLocation = homeLocation.replace(/\s/g, "");
+												var res1 = homeLocation.split(",");
 												var lat1 = res1[0];
 												var lon1 = res1[1];
 												var distance1 = calcCrow(lat1, lon1, enlem, boylam);
@@ -510,13 +511,13 @@ app.post('/trigger', async function (req, res) {
 									.get()
 									.then((querySnapshot) => {
 										querySnapshot.forEach((doc) => {
-											var firstLocation = doc.data().firstLocation;
+											var homeLocation = doc.data().homeLocation;
 											var lastLocation = doc.data().lastLocation;
 											var distance1 = 200;
 											var distance2 = 200;
-											if (typeof firstLocation !== "undefined") {
-												firstLocation = firstLocation.replace(/\s/g, "");
-												var res1 = firstLocation.split(",");
+											if (typeof homeLocation !== "undefined") {
+												homeLocation = homeLocation.replace(/\s/g, "");
+												var res1 = homeLocation.split(",");
 												var lat1 = res1[0];
 												var lon1 = res1[1];
 												var distance1 = calcCrow(lat1, lon1, enlem, boylam);
